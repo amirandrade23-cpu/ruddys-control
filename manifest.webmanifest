@@ -1,0 +1,9 @@
+{
+  "name": "Ruddy's - Control de papas",
+  "short_name": "Ruddy's Papas",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#171717",
+  "icons": []
+}

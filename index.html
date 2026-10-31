@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#171717">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ruddy's Papas">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Ruddy's · Control de papas</title>
+<style>
+:root{color-scheme:dark;--bg:#111;--panel:#1d1d1d;--line:#353535;--muted:#aaa;--accent:#f5a623;--green:#218a50}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 14px calc(20px + env(safe-area-inset-bottom))}
+main{max-width:680px;margin:auto}.head{text-align:center;padding:18px 0 12px}.head h1{margin:0;font-size:27px}.head p{margin:5px 0;color:var(--muted);font-size:12px;letter-spacing:1.5px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 14px}.tabs button{padding:14px 8px;border-radius:13px;border:1px solid var(--line);background:var(--panel);color:#fff;font-size:17px;font-weight:700}.tabs button.active{background:#f5a623;color:#171717;border-color:#f5a623}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 7px;text-align:center}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{display:block;font-size:25px;margin-top:4px}
+h2{font-size:16px;margin:16px 2px 10px}.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.product{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:11px;min-width:0}.name{font-size:14px;font-weight:650;min-height:34px;display:flex;align-items:center}.count{text-align:center;font-size:30px;font-weight:800;padding:5px 0 9px;font-variant-numeric:tabular-nums}.controls{display:grid;grid-template-columns:1fr 1fr;gap:7px}.controls button{height:43px;border-radius:10px;border:1px solid var(--line);font-size:23px;font-weight:700}.minus{background:#303030;color:#fff}.plus{background:var(--accent);color:#171717}
+.actions{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:12px;display:grid;gap:9px}.totalrow{display:flex;justify-content:space-between;align-items:center;font-weight:700;padding:3px 2px 6px}.totalrow strong{font-size:25px}.action{border:0;border-radius:11px;padding:14px 10px;font-size:15px;font-weight:750;color:#fff;background:var(--green)}.secondary{background:#343434}.danger{background:#762d2d}.summary{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px;margin-top:14px}.summary div{display:flex;justify-content:space-between;padding:5px 0;color:#ddd}.summary strong{color:#fff}.note{color:var(--muted);font-size:11px;text-align:center;line-height:1.45;margin:14px 4px}.toast{position:fixed;bottom:calc(15px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#eee;color:#111;padding:10px 16px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}.toast.show{opacity:1}
+@media(min-width:560px){.products{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<main>
+ <header class="head"><h1>🍟 RUDDY'S</h1><p>CONTROL DE PAPAS</p></header>
+ <div class="tabs">
+  <button id="salonTab" class="active" onclick="setTab('salon')">🍽️ Salón</button>
+  <button id="deliveryTab" onclick="setTab('delivery')">🛵 Delivery</button>
+ </div>
+ <section class="stats">
+  <div class="stat"><small>Pedidos pendientes</small><strong id="pending">0</strong></div>
+  <div class="stat"><small>Terminados</small><strong id="done">0</strong></div>
+  <div class="stat"><small>Unidades en cuenta</small><strong id="units">0</strong></div>
+ </section>
+ <h2>Productos</h2>
+ <section class="products" id="products"></section>
+ <section class="actions">
+  <div class="totalrow"><span>Unidades de este pedido</span><strong id="total">0</strong></div>
+  <button class="action" onclick="finishOrder()">✓ Pedido terminado</button>
+  <button class="action secondary" onclick="registerPending()">＋ Registrar pedido pendiente</button>
+  <button class="action danger" onclick="clearCounts()">Limpiar cantidades actuales</button>
+ </section>
+ <section class="summary">
+  <h2 style="margin:0 0 8px">Resumen del turno</h2>
+  <div><span>Salón · terminados</span><strong id="salonDone">0</strong></div>
+  <div><span>Delivery · terminados</span><strong id="deliveryDone">0</strong></div>
+  <div><span>Salón · pendientes</span><strong id="salonPending">0</strong></div>
+  <div><span>Delivery · pendientes</span><strong id="deliveryPending">0</strong></div>
+  <div><span>Total de pedidos terminados</span><strong id="allDone">0</strong></div>
+ </section>
+ <button class="action danger" style="width:100%;margin-top:12px" onclick="resetShift()">Reiniciar todo el turno</button>
+ <p class="note">Los datos se guardan automáticamente en este dispositivo y navegador. Antes de reiniciar el turno, asegurate de que ya no necesitás los contadores.</p>
+</main>
+<div id="toast" class="toast"></div>
+<script>
+const products=["Cono de papa","Plato de papa","Papas Ruddy's","Papa cervecera","Nuggets","Aros","Chess Pillow","Chicken","Aro para hamburguesa","Bastones de muzzarella","Boniatos"];
+const fresh=()=>({counts:{salon:{},delivery:{}},pending:{salon:0,delivery:0},done:{salon:0,delivery:0}});
+let state;
+try{state=JSON.parse(localStorage.getItem('ruddysControlV1'))||fresh()}catch(e){state=fresh()}
+let tab='salon';
+function save(){localStorage.setItem('ruddysControlV1',JSON.stringify(state));render()}
+function total(){return Object.values(state.counts[tab]).reduce((a,b)=>a+b,0)}
+function setTab(t){tab=t;render()}
+function change(name,delta){let n=(state.counts[tab][name]||0)+delta;state.counts[tab][name]=Math.max(0,n);save()}
+function finishOrder(){if(total()===0){notify('Sumá al menos un producto primero');return}state.done[tab]++;state.pending[tab]=Math.max(0,state.pending[tab]-1);state.counts[tab]={};save();notify('Pedido terminado registrado')}
+function registerPending(){if(total()===0){notify('Sumá al menos un producto primero');return}state.pending[tab]++;save();notify('Pedido pendiente registrado')}
+function clearCounts(){if(!confirm('¿Limpiar las cantidades de este pedido?'))return;state.counts[tab]={};save()}
+function resetShift(){if(!confirm('¿Reiniciar todos los contadores del turno? Esta acción no se puede deshacer.'))return;state=fresh();save();notify('Turno reiniciado')}
+function notify(s){const el=document.getElementById('toast');el.textContent=s;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1700)}
+function render(){
+ document.getElementById('salonTab').classList.toggle('active',tab==='salon');
+ document.getElementById('deliveryTab').classList.toggle('active',tab==='delivery');
+ document.getElementById('pending').textContent=state.pending[tab];
+ document.getElementById('done').textContent=state.done[tab];
+ document.getElementById('units').textContent=total();
+ document.getElementById('total').textContent=total();
+ document.getElementById('products').innerHTML=products.map(p=>`<article class="product"><div class="name">${p}</div><div class="count">${state.counts[tab][p]||0}</div><div class="controls"><button class="minus" aria-label="Restar ${p}" onclick="change(${JSON.stringify(p)},-1)">−</button><button class="plus" aria-label="Sumar ${p}" onclick="change(${JSON.stringify(p)},1)">+</button></div></article>`).join('');
+ document.getElementById('salonDone').textContent=state.done.salon;
+ document.getElementById('deliveryDone').textContent=state.done.delivery;
+ document.getElementById('salonPending').textContent=state.pending.salon;
+ document.getElementById('deliveryPending').textContent=state.pending.delivery;
+ document.getElementById('allDone').textContent=state.done.salon+state.done.delivery;
+}
+render();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
