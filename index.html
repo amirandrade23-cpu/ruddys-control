@@ -88,8 +88,8 @@ function render(){
     <div class="name">${p}</div>
     <div class="count">${state.counts[tab][p] || 0}</div>
     <div class="controls">
-      <button class="minus" onclick="change('${p}', -1)">−</button>
-      <button class="plus" onclick="change('${p}', 1)">+</button>
+     <button class="minus" onclick="change(${JSON.stringify(p)}, -1)">−</button>
+<button class="plus" onclick="change(${JSON.stringify(p)}, 1)">+</button>
     </div>
   </article>
 `).join('');
