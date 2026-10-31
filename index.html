@@ -94,11 +94,15 @@ function render(){
     </article>
   `).join('');
 
-  document.querySelectorAll('#products button').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      change(btn.dataset.product,Number(btn.dataset.delta));
-    });
-  });
+  document.getElementById('products').onclick = function(event) {
+  const btn = event.target.closest('button[data-product]');
+  if (!btn) return;
+
+  const product = btn.getAttribute('data-product');
+  const delta = Number(btn.getAttribute('data-delta'));
+
+  change(product, delta);
+};
 
   document.getElementById('salonDone').textContent=state.done.salon;
   document.getElementById('deliveryDone').textContent=state.done.delivery;
