@@ -83,16 +83,16 @@ function render(){
   document.getElementById('units').textContent=total();
   document.getElementById('total').textContent=total();
 
-  document.getElementById('products').innerHTML=products.map(p=>`
-    <article class="product">
-      <div class="name">${p}</div>
-      <div class="count">${state.counts[tab][p]||0}</div>
-      <div class="controls">
-        <button class="minus" data-product="${p}" data-delta="-1">−</button>
-        <button class="plus" data-product="${p}" data-delta="1">+</button>
-      </div>
-    </article>
-  `).join('');
+  document.getElementById('products').innerHTML = products.map(p => `
+  <article class="product">
+    <div class="name">${p}</div>
+    <div class="count">${state.counts[tab][p] || 0}</div>
+    <div class="controls">
+      <button class="minus" onclick="change('${p}', -1)">−</button>
+      <button class="plus" onclick="change('${p}', 1)">+</button>
+    </div>
+  </article>
+`).join('');
 
   document.getElementById('products').onclick = function(event) {
   const btn = event.target.closest('button[data-product]');
