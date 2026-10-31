@@ -68,18 +68,35 @@ function clearCounts(){if(!confirm('¿Limpiar las cantidades de este pedido?'))r
 function resetShift(){if(!confirm('¿Reiniciar todos los contadores del turno? Esta acción no se puede deshacer.'))return;state=fresh();save();notify('Turno reiniciado')}
 function notify(s){const el=document.getElementById('toast');el.textContent=s;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1700)}
 function render(){
- document.getElementById('salonTab').classList.toggle('active',tab==='salon');
- document.getElementById('deliveryTab').classList.toggle('active',tab==='delivery');
- document.getElementById('pending').textContent=state.pending[tab];
- document.getElementById('done').textContent=state.done[tab];
- document.getElementById('units').textContent=total();
- document.getElementById('total').textContent=total();
- document.getElementById('products').innerHTML=products.map(p=>`<article class="product"><div class="name">${p}</div><div class="count">${state.counts[tab][p]||0}</div><div class="controls"><button class="minus" aria-label="Restar ${p}" onclick="change(${JSON.stringify(p)},-1)">−</button><button class="plus" aria-label="Sumar ${p}" onclick="change(${JSON.stringify(p)},1)">+</button></div></article>`).join('');
- document.getElementById('salonDone').textContent=state.done.salon;
- document.getElementById('deliveryDone').textContent=state.done.delivery;
- document.getElementById('salonPending').textContent=state.pending.salon;
- document.getElementById('deliveryPending').textContent=state.pending.delivery;
- document.getElementById('allDone').textContent=state.done.salon+state.done.delivery;
+  document.getElementById('salonTab').classList.toggle('active',tab==='salon');
+  document.getElementById('deliveryTab').classList.toggle('active',tab==='delivery');
+  document.getElementById('pending').textContent=state.pending[tab];
+  document.getElementById('done').textContent=state.done[tab];
+  document.getElementById('units').textContent=total();
+  document.getElementById('total').textContent=total();
+
+  document.getElementById('products').innerHTML=products.map(p=>`
+    <article class="product">
+      <div class="name">${p}</div>
+      <div class="count">${state.counts[tab][p]||0}</div>
+      <div class="controls">
+        <button class="minus" data-product="${p}" data-delta="-1">−</button>
+        <button class="plus" data-product="${p}" data-delta="1">+</button>
+      </div>
+    </article>
+  `).join('');
+
+  document.querySelectorAll('#products button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      change(btn.dataset.product,Number(btn.dataset.delta));
+    });
+  });
+
+  document.getElementById('salonDone').textContent=state.done.salon;
+  document.getElementById('deliveryDone').textContent=state.done.delivery;
+  document.getElementById('salonPending').textContent=state.pending.salon;
+  document.getElementById('deliveryPending').textContent=state.pending.delivery;
+  document.getElementById('allDone').textContent=state.done.salon+state.done.delivery;
 }
 render();
 if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
