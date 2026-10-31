@@ -58,7 +58,15 @@ const fresh=()=>({counts:{salon:{},delivery:{}},pending:{salon:0,delivery:0},don
 let state;
 try{state=JSON.parse(localStorage.getItem('ruddysControlV1'))||fresh()}catch(e){state=fresh()}
 let tab='salon';
-function save(){localStorage.setItem('ruddysControlV1',JSON.stringify(state));render()}
+function save(){
+  render();
+  try {
+    localStorage.setItem('ruddysControlV1', JSON.stringify(state));
+  } catch(error) {
+    console.error('Error al guardar:', error);
+    notify('No se pudieron guardar los datos');
+  }
+}
 function total(){return Object.values(state.counts[tab]).reduce((a,b)=>a+b,0)}
 function setTab(t){tab=t;render()}
 function change(name,delta){let n=(state.counts[tab][name]||0)+delta;state.counts[tab][name]=Math.max(0,n);save()}
